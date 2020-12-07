@@ -19,14 +19,24 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "adc.h"
 #include "dma.h"
+#include "rf.h"
+#include "rtc.h"
+#include "app_entry.h"
+#include "app_common.h"
 #include "tim.h"
 #include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+//#include "stm32_seq.h"
+#include "otp.h"
+#include "stm32_lpm.h"
+#include "dbg_trace.h"
+#include "hw_conf.h"
 #include "myMain.h"
 /* USER CODE END Includes */
 
@@ -52,8 +62,13 @@
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
+static void Reset_Device( void );
+static void Reset_IPCC( void );
+static void Init_Exti( void );
+static void Reset_BackupDomain( void );
+static void Config_HSE(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -68,7 +83,12 @@ void SystemClock_Config(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+	/* USER CODE BEGIN 1 */
+			  /**
+			   * The OPTVERR flag is wrongly set at power on
+			   * It shall be cleared before using any HAL_FLASH_xxx() api
+			   */
+			  __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_OPTVERR);
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -77,6 +97,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  Reset_Device();
 
   /* USER CODE END Init */
 
@@ -84,6 +105,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  Init_Exti( );
 
   /* USER CODE END SysInit */
 
@@ -94,15 +116,23 @@ int main(void)
   MX_TIM17_Init();
   MX_ADC1_Init();
   MX_USB_Device_Init();
+  MX_RF_Init();
+  MX_RTC_Init();
   /* USER CODE BEGIN 2 */
-
+//  myMain();
   /* USER CODE END 2 */
 
+  /* Init scheduler */
+  osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  myMain();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -126,14 +156,20 @@ void SystemClock_Config(void)
   /** Macro to configure the PLL clock source
   */
   __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSE);
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
   /** Configure the main internal regulator output voltage
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE
+                              |RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
@@ -159,7 +195,8 @@ void SystemClock_Config(void)
   }
   /** Initializes the peripherals clocks
   */
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_USB
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_SMPS|RCC_PERIPHCLK_RFWAKEUP
+                              |RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_USB
                               |RCC_PERIPHCLK_ADC;
   PeriphClkInitStruct.PLLSAI1.PLLN = 6;
   PeriphClkInitStruct.PLLSAI1.PLLP = RCC_PLLP_DIV2;
@@ -168,6 +205,8 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLLSAI1.PLLSAI1ClockOut = RCC_PLLSAI1_USBCLK;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLLSAI1;
   PeriphClkInitStruct.AdcClockSelection = RCC_ADCCLKSOURCE_SYSCLK;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
+  PeriphClkInitStruct.RFWakeUpClockSelection = RCC_RFWKPCLKSOURCE_HSE_DIV1024;
   PeriphClkInitStruct.SmpsClockSelection = RCC_SMPSCLKSOURCE_HSI;
   PeriphClkInitStruct.SmpsDivSelection = RCC_SMPSCLKDIV_RANGE1;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
@@ -181,7 +220,120 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
+static void Reset_BackupDomain( void )
+{
+  if ((LL_RCC_IsActiveFlag_PINRST() != FALSE) && (LL_RCC_IsActiveFlag_SFTRST() == FALSE))
+  {
+    HAL_PWR_EnableBkUpAccess(); /**< Enable access to the RTC registers */
+
+    /**
+     *  Write twice the value to flush the APB-AHB bridge
+     *  This bit shall be written in the register before writing the next one
+     */
+    HAL_PWR_EnableBkUpAccess();
+
+    __HAL_RCC_BACKUPRESET_FORCE();
+    __HAL_RCC_BACKUPRESET_RELEASE();
+  }
+
+  return;
+}
+
+static void Reset_Device( void )
+{
+#if ( CFG_HW_RESET_BY_FW == 1 )
+  Reset_BackupDomain();
+
+  Reset_IPCC();
+#endif
+
+  return;
+}
+
+static void Reset_IPCC( void )
+{
+  LL_AHB3_GRP1_EnableClock(LL_AHB3_GRP1_PERIPH_IPCC);
+
+  LL_C1_IPCC_ClearFlag_CHx(
+                           IPCC,
+                           LL_IPCC_CHANNEL_1 | LL_IPCC_CHANNEL_2 | LL_IPCC_CHANNEL_3 | LL_IPCC_CHANNEL_4
+                               | LL_IPCC_CHANNEL_5 | LL_IPCC_CHANNEL_6);
+
+  LL_C2_IPCC_ClearFlag_CHx(
+                           IPCC,
+                           LL_IPCC_CHANNEL_1 | LL_IPCC_CHANNEL_2 | LL_IPCC_CHANNEL_3 | LL_IPCC_CHANNEL_4
+                               | LL_IPCC_CHANNEL_5 | LL_IPCC_CHANNEL_6);
+
+  LL_C1_IPCC_DisableTransmitChannel(
+                                    IPCC,
+                                    LL_IPCC_CHANNEL_1 | LL_IPCC_CHANNEL_2 | LL_IPCC_CHANNEL_3 | LL_IPCC_CHANNEL_4
+                                        | LL_IPCC_CHANNEL_5 | LL_IPCC_CHANNEL_6);
+
+  LL_C2_IPCC_DisableTransmitChannel(
+                                    IPCC,
+                                    LL_IPCC_CHANNEL_1 | LL_IPCC_CHANNEL_2 | LL_IPCC_CHANNEL_3 | LL_IPCC_CHANNEL_4
+                                        | LL_IPCC_CHANNEL_5 | LL_IPCC_CHANNEL_6);
+
+  LL_C1_IPCC_DisableReceiveChannel(
+                                   IPCC,
+                                   LL_IPCC_CHANNEL_1 | LL_IPCC_CHANNEL_2 | LL_IPCC_CHANNEL_3 | LL_IPCC_CHANNEL_4
+                                       | LL_IPCC_CHANNEL_5 | LL_IPCC_CHANNEL_6);
+
+  LL_C2_IPCC_DisableReceiveChannel(
+                                   IPCC,
+                                   LL_IPCC_CHANNEL_1 | LL_IPCC_CHANNEL_2 | LL_IPCC_CHANNEL_3 | LL_IPCC_CHANNEL_4
+                                       | LL_IPCC_CHANNEL_5 | LL_IPCC_CHANNEL_6);
+
+  return;
+}
+
+static void Init_Exti( void )
+{
+  /**< Disable all wakeup interrupt on CPU1  except IPCC(36), HSEM(38) */
+  LL_EXTI_DisableIT_0_31(~0);
+  LL_EXTI_DisableIT_32_63( (~0) & (~(LL_EXTI_LINE_36 | LL_EXTI_LINE_38)) );
+
+  return;
+}
+
+
+static void Config_HSE(void)
+{
+    OTP_ID0_t * p_otp;
+
+  /**
+   * Read HSE_Tuning from OTP
+   */
+  p_otp = (OTP_ID0_t *) OTP_Read(0);
+  if (p_otp)
+  {
+    LL_RCC_HSE_SetCapacitorTuning(p_otp->hse_tuning);
+  }
+
+  return;
+}
 /* USER CODE END 4 */
+
+ /**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM1 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM1) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
