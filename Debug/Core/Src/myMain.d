@@ -58,7 +58,10 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_rtc.h ../Core/Inc/tim.h \
  ../Core/Inc/gpio.h ../Core/Inc/stepper.h \
  ../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h \
- ../Core/Inc/adc.h
+ ../Core/Inc/adc.h ../Middlewares/ST/STM32_WPAN/utilities/otp.h \
+ ../Middlewares/ST/STM32_WPAN/utilities/utilities_common.h \
+ ../Core/Inc/app_conf.h ../Utilities/lpm/tiny_lpm/stm32_lpm.h \
+ ../Middlewares/ST/STM32_WPAN/utilities/dbg_trace.h ../Core/Inc/hw_conf.h
 
 ../Core/Inc/myMain.h:
 
@@ -191,3 +194,15 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
 ../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h:
 
 ../Core/Inc/adc.h:
+
+../Middlewares/ST/STM32_WPAN/utilities/otp.h:
+
+../Middlewares/ST/STM32_WPAN/utilities/utilities_common.h:
+
+../Core/Inc/app_conf.h:
+
+../Utilities/lpm/tiny_lpm/stm32_lpm.h:
+
+../Middlewares/ST/STM32_WPAN/utilities/dbg_trace.h:
+
+../Core/Inc/hw_conf.h:

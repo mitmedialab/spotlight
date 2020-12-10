@@ -241,6 +241,8 @@ uint32_t Stepper::step(int steps_to_move)
 		return 0;
 	}
 
+	this->step_tracker += steps_to_move;
+
 	// compensate in case motor direction is flipped
 	steps_to_move = steps_to_move * this->motor_dir;
 
@@ -495,15 +497,26 @@ void Stepper::stepMotor(int thisStep)
 }
 
 void Stepper::honeAxis(void){
+
+	// set step tracker to max step to bypass over step protection in step()
+	this->step_tracker = this->max_step;
+
 	while(*(this->end_stop) != 0){
 		// give time for the end stop value to be updated by the ADC via DMA
 		//todo: optimize this to make this quicker (i.e., increase ADC sample frequency)
 		HAL_Delay(1);
 
-		step(1);
+
+
+		step(-1);
 	}
 
 	step_tracker = 0;
+}
+
+void Stepper::setAbsPos(int32_t step_cnt){
+	this->steps_to_move = step_cnt - this->step_tracker;
+	step(this->steps_to_move);
 }
 
 uint32_t Stepper::getStepCount(void){

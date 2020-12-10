@@ -92,13 +92,14 @@
 #define LED_STEPS_FOR_FULL_REV 	55404 	// BASE_GEAR_RATIO * STEPS_FOR_MOTOR
 #define LED_MIN_ANGLE_STEP		3 		// this equals a 0.01949 degree revolution
 #define LED_STEP_RANGE 			31011
+#define LED_CAL_STEP_MULTI		10  	// increases speed of calibration with coarser steps
 
 // second degree of freedom
 #define BASE_GEAR_RATIO 		6
 #define BASE_STEPS_FOR_FULL_REV 12312 	// LED_GEAR_RATIO * STEPS_FOR_MOTOR
 #define BASE_MIN_ANGLE_STEP		1 		// this equals a 0.029 degree revolution
 #define BASE_STEP_RANGE			6156	// 180-degrees (can go 360 but the LED can revolve >180-degrees so no need
-
+#define BASE_CAL_STEP_MULTI		10		// increases speed of calibration with coarser steps
 
 // library interface description
 class Stepper {
@@ -131,6 +132,9 @@ class Stepper {
     // return current relative step count
     uint32_t getStepCount(void);
 
+    // moveToAbsPosition
+    void setAbsPos(int32_t step_cnt);
+
     // hone axis to start
     void honeAxis(void);
 
@@ -146,6 +150,7 @@ class Stepper {
     int32_t step_number;          // which step the motor is on
     int32_t max_step;		  // max step range
     uint32_t step_tracker;		  // var to track step position
+    uint32_t steps_to_move;
 
     // motor pin numbers:
     uint16_t motor_pin_1;
