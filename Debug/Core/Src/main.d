@@ -76,7 +76,8 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  ../Middlewares/ST/STM32_WPAN/utilities/utilities_common.h \
  ../Core/Inc/app_conf.h ../Utilities/lpm/tiny_lpm/stm32_lpm.h \
  ../Middlewares/ST/STM32_WPAN/utilities/dbg_trace.h ../Core/Inc/hw_conf.h \
- ../Core/Inc/myMain.h
+ ../Core/Inc/myMain.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 
 ../Core/Inc/main.h:
 
@@ -257,3 +258,5 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 ../Core/Inc/hw_conf.h:
 
 ../Core/Inc/myMain.h:
+
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:

@@ -55,13 +55,24 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_utils.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_hsem.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_gpio.h \
- ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_rtc.h ../Core/Inc/tim.h \
- ../Core/Inc/gpio.h ../Core/Inc/stepper.h \
- ../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h \
- ../Core/Inc/adc.h ../Middlewares/ST/STM32_WPAN/utilities/otp.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_rtc.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
+ ../Core/Inc/gpio.h ../Middlewares/ST/STM32_WPAN/utilities/otp.h \
  ../Middlewares/ST/STM32_WPAN/utilities/utilities_common.h \
  ../Core/Inc/app_conf.h ../Utilities/lpm/tiny_lpm/stm32_lpm.h \
- ../Middlewares/ST/STM32_WPAN/utilities/dbg_trace.h ../Core/Inc/hw_conf.h
+ ../Middlewares/ST/STM32_WPAN/utilities/dbg_trace.h ../Core/Inc/hw_conf.h \
+ ../Core/Inc/calibration.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/ip6.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/message.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/instance.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/error.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/toolchain.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/logging.h \
+ ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/radio.h \
+ ../Core/Inc/spotlight_config.h ../Core/Inc/stepper.h \
+ ../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h \
+ ../Core/Inc/spotlight_config.h ../Core/Inc/tim.h ../Core/Inc/stepper.h \
+ ../Core/Inc/adc.h
 
 ../Core/Inc/myMain.h:
 
@@ -185,15 +196,9 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_rtc.h:
 
-../Core/Inc/tim.h:
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
 
 ../Core/Inc/gpio.h:
-
-../Core/Inc/stepper.h:
-
-../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h:
-
-../Core/Inc/adc.h:
 
 ../Middlewares/ST/STM32_WPAN/utilities/otp.h:
 
@@ -206,3 +211,33 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
 ../Middlewares/ST/STM32_WPAN/utilities/dbg_trace.h:
 
 ../Core/Inc/hw_conf.h:
+
+../Core/Inc/calibration.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/ip6.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/message.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/instance.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/error.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/toolchain.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/logging.h:
+
+../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/radio.h:
+
+../Core/Inc/spotlight_config.h:
+
+../Core/Inc/stepper.h:
+
+../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h:
+
+../Core/Inc/spotlight_config.h:
+
+../Core/Inc/tim.h:
+
+../Core/Inc/stepper.h:
+
+../Core/Inc/adc.h:

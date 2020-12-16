@@ -39,6 +39,9 @@
 /* Private includes -----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "led.h"
+#include "spotlight_config.h"
+//#include "calibration.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -73,8 +76,7 @@ const osThreadAttr_t ThreadCliProcess_attr = {
  };
 
 /* USER CODE BEGIN PD */
-#define C_NODE_CAL_RESSOURCE					"nodeCal"
-#define C_NODE_INFO_RESSOURCE					"nodeInfo"
+
 
 /* RADIO SPECIFIC */
 #define TRANSMIT_POWER							6 //in dbm
@@ -128,11 +130,16 @@ static void APP_THREAD_CoapNodeCalRequestHandler(void                * pContext,
 													otCoapHeader        * pHeader,
 													otMessage           * pMessage,
 													const otMessageInfo * pMessageInfo);
+static void APP_THREAD_CoapNodeSpotRequestHandler(void                * pContext,
+													otCoapHeader        * pHeader,
+													otMessage           * pMessage,
+													const otMessageInfo * pMessageInfo);
 //static void APP_THREAD_CoapNodeInfoRequestHandler(otCoapHeader *pHeader, otMessage *pMessage,
 //		const otMessageInfo *pMessageInfo);
 static void APP_THREAD_DummyReqHandler(void *p_context, otCoapHeader *pHeader, otMessage *pMessage,
 		const otMessageInfo *pMessageInfo);
-static void APP_THREAD_SendDataResponse(void *message, uint16_t msgSize, otCoapHeader *pRequestHeader, const otMessageInfo *pMessageInfo);
+static void APP_THREAD_CoapSendDataResponse(otCoapHeader    * pRequestHeader,
+    const otMessageInfo * pMessageInfo);
 static void APP_THREAD_SendCoapUnicastRequest(char *message, uint8_t message_length, char *ipv6_addr, char *resource);
 
 /* USER CODE END PFP */
@@ -182,6 +189,11 @@ static osThreadId_t OsTaskCliId;            /* Task used to manage CLI comamnd  
 //		(void*) APP_THREAD_CoapNodeCalRequestHandler, NULL };
 
 static otCoapResource OT_Node_Cal_Ressource = {C_NODE_CAL_RESSOURCE, APP_THREAD_CoapNodeCalRequestHandler,"myCal", NULL};
+static otCoapResource OT_Node_Spot_Ressource = {C_NODE_SPOT_RESSOURCE, APP_THREAD_CoapNodeSpotRequestHandler,"mySpot", NULL};
+
+
+
+
 //static otCoapResource OT_Node_Info_Ressource = {C_NODE_INFO_RESSOURCE, APP_THREAD_CoapNodeInfoRequestHandler,"myInfo", NULL};
 
 const otMasterKey masterKey = { 0x33, 0x33, 0x44, 0x44, 0x33, 0x33, 0x44, 0x44, 0x33, 0x33, 0x44, 0x44, 0x33, 0x33,
@@ -190,8 +202,8 @@ const otExtendedPanId extendedPanId = { 0x11, 0x11, 0x11, 0x11, 0x22, 0x22, 0x22
 const char networkName[20] = "PatrickNetwork";
 const char nodeInfoResource[15] = "nodeInfo";
 const char nodeCalResource[15] = "nodeCal";
+const char nodeSpotResource[15] = "nodeSpot";
 
-otIp6Address multicastAddr;
 static otMessage *pOT_Message = NULL;
 
 struct sendIP_struct {
@@ -437,6 +449,7 @@ static void APP_THREAD_DeviceConfig(void)
 //  	error = otCoapAddResource(NULL, &OT_Node_Info_Ressource);
 
   	error = otCoapAddResource(NULL, &OT_Node_Cal_Ressource);
+  	error = otCoapAddResource(NULL, &OT_Node_Spot_Ressource);
 
   #ifdef BORDER_ROUTER_NODE
   	error = otCoapAddResource(NULL, &OT_Border_Log_Ressource);
@@ -451,7 +464,7 @@ static void APP_THREAD_DeviceConfig(void)
   #endif
   	// set default multicast address for border router
   //    otIp6AddressFromString("ff03::1", &borderRouter.ipv6);
-//  	otIp6AddressFromString("ff03::1", &multicastAddr);
+  	otIp6AddressFromString("ff03::1", &multicastAddr);
 //  	memcpy(&borderRouter.ipv6, &multicastAddr, sizeof(multicastAddr));
 
   	// set UID in local state variable
@@ -616,15 +629,40 @@ static void APP_THREAD_FreeRTOSSendCLIToM0Task(void *argument)
 /* USER CODE END FREERTOS_WRAPPER_FUNCTIONS */
 
 /* USER CODE BEGIN FD_LOCAL_FUNCTIONS */
-volatile otCoapCode testCode;
-volatile otCoapType testType;
-volatile uint8_t tempVar[30];
+
 //static void APP_THREAD_DummyReqHandler(void *p_context, otCoapHeader *pHeader, otMessage *pMessage,
 //		const otMessageInfo *pMessageInfo) {
 //	tempMessageInfo = pMessageInfo;
 //	receivedMessage = (otMessageInfo*) pMessage;
 //}
 
+static void APP_THREAD_CoapNodeSpotRequestHandler(void                * pContext,
+													otCoapHeader        * pHeader,
+													otMessage           * pMessage,
+													const otMessageInfo * pMessageInfo) {
+#ifdef DONGLE_CODE
+		BSP_LED_Toggle(LED_RED);
+#endif
+		struct MeasMsg receivedMeasMsg;
+		if (otMessageRead(pMessage, otMessageGetOffset(pMessage), &receivedMeasMsg, sizeof(receivedMeasMsg))
+				== sizeof(receivedMeasMsg)) {
+
+
+			if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_PUT)
+			{
+				measMsgReceivedFromNode(&receivedMeasMsg);
+				toggleLed(0,0,1);
+			}
+
+			if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_CONFIRMABLE)
+			{
+				APP_THREAD_CoapSendDataResponse(pHeader, pMessageInfo);
+			}
+
+		}
+}
+
+struct CalMsg receivedCalMsg;
 static void APP_THREAD_CoapNodeCalRequestHandler(void                * pContext,
 													otCoapHeader        * pHeader,
 													otMessage           * pMessage,
@@ -633,45 +671,65 @@ static void APP_THREAD_CoapNodeCalRequestHandler(void                * pContext,
 		BSP_LED_Toggle(LED_RED);
 #endif
 
-//		if (otMessageRead(pMessage, otMessageGetOffset(pMessage), &tempVar, sizeof(tempVar))
-//				== sizeof(tempVar)) {
-//			// if the message was a put request, copy message over to border router info struct
-////			if ((otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_PUT)
-////					|| (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_POST)) {
-////
-////				memcpy(&borderRouter, &receivedSystemCal, sizeof(receivedSystemCal));
-////
-////				// update the onboard RTC unix time
-////				updateRTC(borderRouter.epoch);
-////			}
-//		}
+		if (otMessageRead(pMessage, otMessageGetOffset(pMessage), &receivedCalMsg, sizeof(receivedCalMsg))
+				== sizeof(receivedCalMsg)) {
 
-//		receivedMessage = (otMessageInfo*) pMessage;
-		otMessageRead(pMessage, otMessageGetOffset(pMessage), tempVar, sizeof(tempVar));
+			if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_PUT)
+			{
+				if(receivedCalMsg.cal_fcn == CALIBRATION_START_COMMAND){
+					// TODO: start calibration
 
-		// send info if requested
-		testCode = otCoapHeaderGetCode(pHeader);
-		testType = otCoapHeaderGetType(pHeader);
-
-		if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_NON_CONFIRMABLE)
-		{
-			toggleLed(1,0,0);
-		}
-
-		if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_ACKNOWLEDGMENT)
-				{
-					toggleLed(0,1,0);
+				}else if(receivedCalMsg.cal_fcn == CALIBRATION_STOP_COMMAND){
+					// TODO: stop calibration
 				}
+				toggleLed(0,0,1);
+			}
 
-//		    if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_PUT)
-//		    {
-//		      break;
-//		    }
+			if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_GET)
+			{
+				if(receivedCalMsg.cal_fcn == CALIBRATION_GET_MEAS){
+					// send measurement to Spotlight
+					// 		TODO this can be done in an ACK but doing it now in a separate PUT request to the nodeSpot resource
+#ifdef SOLAR_SENSOR_NODE
+					sendPowerMeasurement(pMessageInfo->mPeerAddr, receivedCalMsg.angle_1, receivedCalMsg.angle_2);
+#endif
+				}
+				toggleLed(1,0,0);
+			}
 
-		if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_CONFIRMABLE)
-		{
-			toggleLed(0,0,1);
+			if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_CONFIRMABLE)
+			{
+				APP_THREAD_CoapSendDataResponse(pHeader, pMessageInfo);
+			}
+
 		}
+//
+////		receivedMessage = (otMessageInfo*) pMessage;
+//		otMessageRead(pMessage, otMessageGetOffset(pMessage), tempVar, sizeof(tempVar));
+//
+//		// send info if requested
+//		testCode = otCoapHeaderGetCode(pHeader);
+//		testType = otCoapHeaderGetType(pHeader);
+//
+//		if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_NON_CONFIRMABLE)
+//		{
+//			toggleLed(1,0,0);
+//		}
+//
+//		if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_ACKNOWLEDGMENT)
+//				{
+//					toggleLed(0,1,0);
+//				}
+//
+////		    if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_PUT)
+////		    {
+////		      break;
+////		    }
+//
+//		if (otCoapHeaderGetType(pHeader) == OT_COAP_TYPE_CONFIRMABLE)
+//		{
+//			toggleLed(0,0,1);
+//		}
 
 //		if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_GET) {
 ////			APP_THREAD_SendDataResponse(&borderRouter, sizeof(borderRouter), pHeader, pMessageInfo);
@@ -747,6 +805,42 @@ void APP_THREAD_SendMyInfo() {
 }
 
 /**
+ * @brief This function acknowledges the data reception by sending an ACK
+ *    back to the sender.
+ * @param  pRequestHeader coap header
+ * @param  pMessageInfo message info pointer
+ * @retval None
+ */
+static void APP_THREAD_CoapSendDataResponse(otCoapHeader    * pRequestHeader,
+    const otMessageInfo * pMessageInfo)
+{
+  otError  error = OT_ERROR_NONE;
+
+  do{
+    APP_DBG(" ********* APP_THREAD_CoapSendDataResponse ********* ");
+    otCoapHeaderInit(&OT_Header, OT_COAP_TYPE_ACKNOWLEDGMENT, OT_COAP_CODE_CHANGED);
+    otCoapHeaderSetMessageId(&OT_Header, otCoapHeaderGetMessageId(pRequestHeader));
+    otCoapHeaderSetToken(&OT_Header,
+        otCoapHeaderGetToken(pRequestHeader),
+        otCoapHeaderGetTokenLength(pRequestHeader));
+
+    pOT_Message = otCoapNewMessage(NULL, &OT_Header);
+    if (pOT_Message == NULL)
+    {
+      APP_DBG("WARNING : pOT_Message = NULL ! -> exit now");
+      break;
+    }
+    error = otCoapSendResponse(NULL, pOT_Message, pMessageInfo);
+    if (error != OT_ERROR_NONE && pOT_Message != NULL)
+    {
+      otMessageFree(pOT_Message);
+//      APP_THREAD_Error(ERR_THREAD_COAP_DATA_RESPONSE,error);
+    }
+  }while(false);
+}
+
+
+/**
  * @brief This function acknowledge the data reception by sending an ACK
  *    back to the sender.
  * @param  pRequestHeader coap header
@@ -760,41 +854,41 @@ response and original request MUST match.  In a separate
 response, just the tokens of the response and original request
 MUST match.*/
 
-static void APP_THREAD_SendDataResponse(void *message, uint16_t msgSize, otCoapHeader *pRequestHeader, const otMessageInfo *pMessageInfo) {
-	otError error = OT_ERROR_NONE;
+//static void APP_THREAD_SendDataResponse(void *message, uint16_t msgSize, otCoapHeader *pRequestHeader, const otMessageInfo *pMessageInfo) {
+//	otError error = OT_ERROR_NONE;
+//
+//	//APP_DBG(" ********* APP_THREAD_SendDataResponse \r\n");
+//	otCoapHeaderInit(&OT_Header, OT_COAP_TYPE_ACKNOWLEDGMENT, OT_COAP_CODE_CHANGED);
+//	otCoapHeaderSetMessageId(&OT_Header, otCoapHeaderGetMessageId(pRequestHeader));
+//	otCoapHeaderSetToken(&OT_Header, otCoapHeaderGetToken(pRequestHeader), otCoapHeaderGetTokenLength(pRequestHeader));
+//
+//	if (msgSize > 0){
+//		// need this so the coap server doesnt try to parse as 'utf-8' and error out
+//		otCoapHeaderAppendContentFormatOption(&OT_Header, OT_COAP_OPTION_CONTENT_FORMAT_OCTET_STREAM);
+////			  if (error != OT_ERROR_NONE) while(1);
+//
+//		// This function adds Payload Marker indicating beginning of the payload to the CoAP header
+//		otCoapHeaderSetPayloadMarker(&OT_Header); //TODO: if no msg, dont set marker and remove empty message below
+//	}
+//
+//	pOT_Message = otCoapNewMessage(NULL, &OT_Header);
+//	if (pOT_Message == NULL) {
+//		//APP_THREAD_Error(ERR_NEW_MSG_ALLOC,error);
+//	}
+//
+//	// append message if there was one given
+//	if (msgSize > 0) {
+//		error = otMessageAppend(pOT_Message, message, msgSize);
+//	}
+//
+//	error = otCoapSendResponse(NULL, pOT_Message, pMessageInfo);
+//	if (error != OT_ERROR_NONE && pOT_Message != NULL) {
+//		otMessageFree(pOT_Message);
+//		//APP_THREAD_Error(ERR_THREAD_DATA_RESPONSE,error);
+//	}
+//}
 
-	//APP_DBG(" ********* APP_THREAD_SendDataResponse \r\n");
-	otCoapHeaderInit(&OT_Header, OT_COAP_TYPE_ACKNOWLEDGMENT, OT_COAP_CODE_CHANGED);
-	otCoapHeaderSetMessageId(&OT_Header, otCoapHeaderGetMessageId(pRequestHeader));
-	otCoapHeaderSetToken(&OT_Header, otCoapHeaderGetToken(pRequestHeader), otCoapHeaderGetTokenLength(pRequestHeader));
-
-	if (msgSize > 0){
-		// need this so the coap server doesnt try to parse as 'utf-8' and error out
-		otCoapHeaderAppendContentFormatOption(&OT_Header, OT_COAP_OPTION_CONTENT_FORMAT_OCTET_STREAM);
-//			  if (error != OT_ERROR_NONE) while(1);
-
-		// This function adds Payload Marker indicating beginning of the payload to the CoAP header
-		otCoapHeaderSetPayloadMarker(&OT_Header); //TODO: if no msg, dont set marker and remove empty message below
-	}
-
-	pOT_Message = otCoapNewMessage(NULL, &OT_Header);
-	if (pOT_Message == NULL) {
-		//APP_THREAD_Error(ERR_NEW_MSG_ALLOC,error);
-	}
-
-	// append message if there was one given
-	if (msgSize > 0) {
-		error = otMessageAppend(pOT_Message, message, msgSize);
-	}
-
-	error = otCoapSendResponse(NULL, pOT_Message, pMessageInfo);
-	if (error != OT_ERROR_NONE && pOT_Message != NULL) {
-		otMessageFree(pOT_Message);
-		//APP_THREAD_Error(ERR_THREAD_DATA_RESPONSE,error);
-	}
-}
-
-void APP_THREAD_SendCoapMsg(void *message, uint16_t msgSize, otIp6Address *ipv6_addr, char *resource,
+void APP_THREAD_SendCoapMsg(void *message, uint16_t msgSize, otIp6Address *ipv6_addr, const char *resource,
 		uint8_t request_ack, otCoapCode coapCode, uint8_t msgID) {
 	/************ SET MESSAGE INFO (WHERE THE PACKET GOES) ************/
 	// https://openthread.io/reference/struct/ot-message-info.html#structot_message_info

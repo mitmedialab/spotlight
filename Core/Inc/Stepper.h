@@ -78,6 +78,12 @@
 // ensure this library description is only included once
 #ifndef Stepper_h
 #define Stepper_h
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #include "stdint.h"
 #include "stm32wb55xx.h"
 
@@ -174,6 +180,10 @@ class Stepper {
 
     unsigned long last_step_time; // time stamp in us of when the last step was taken
 };
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
 

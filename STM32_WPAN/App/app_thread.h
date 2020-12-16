@@ -36,6 +36,14 @@ extern "C" {
 
 /* USER CODE BEGIN Includes */
 
+#define C_NODE_CAL_RESSOURCE					"nodeCal"
+#define C_NODE_SPOT_RESSOURCE					"nodeSpot"
+#define C_NODE_INFO_RESSOURCE					"nodeInfo"
+
+
+extern const char nodeCalResource[15];
+extern const char nodeSpotResource[15];
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -96,6 +104,7 @@ struct SystemCal
 
 /* External variables --------------------------------------------------------*/
 /* USER CODE BEGIN EV */
+extern otIp6Address multicastAddr;
 
 /* USER CODE END EV */
 
@@ -112,7 +121,8 @@ void APP_THREAD_ProcessMsgM0ToM4(void);
 void APP_THREAD_Init_UART_CLI(void);
 void APP_THREAD_TL_THREAD_INIT(void);
 /* USER CODE BEGIN EF */
-
+void APP_THREAD_SendCoapMsg(void *message, uint16_t msgSize, otIp6Address *ipv6_addr, const char *resource,
+		uint8_t request_ack, otCoapCode coapCode, uint8_t msgID);
 /* USER CODE END EF */
 
 #ifdef __cplusplus

@@ -27,7 +27,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "app_entry.h"
-
+#include "myMain.h"
+#include "spotlight_config.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -117,6 +118,7 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
+  APPE_Init();
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
@@ -137,6 +139,8 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN StartDefaultTask */
   /* Infinite loop */
+	osDelay(100);
+	myMain();
   for(;;)
   {
 	  osThreadFlagsWait(1,osFlagsWaitAll,osWaitForever);

@@ -6,15 +6,22 @@
  */
 
 #include "myMain.h"
-#include "tim.h"
+
 #include "gpio.h"
-#include "stepper.h"
-#include "adc.h"
 
 #include "otp.h"
 #include "stm32_lpm.h"
 #include "dbg_trace.h"
 #include "hw_conf.h"
+
+#include "calibration.h"
+#include "spotlight_config.h"
+
+#ifndef SOLAR_SENSOR_NODE
+#include "tim.h"
+#include "stepper.h"
+#include "adc.h"
+#endif
 
 #define STEPS 2052
 #define STEPS_LED_RANGE 31011
@@ -33,6 +40,14 @@ struct ADC_DATA adc_data;
 
 int myMain(void){
 
+#ifdef SOLAR_SENSOR_NODE
+	#ifndef SOLAR_SENSOR_NODE_I2C_DISABLE
+
+		powerMeasSetup();
+		HAL_Delay(100);
+
+	#endif
+#else
 	HAL_TIM_Base_Start_IT(&htim2);
 
 	HAL_GPIO_WritePin(LED_EN_GPIO_Port, LED_EN_Pin, GPIO_PIN_SET);
@@ -42,20 +57,21 @@ int myMain(void){
 	Stepper motor_base(STEPS, AIN1_1_GPIO_Port, AIN1_1_Pin,
 			AIN2_1_GPIO_Port, AIN2_1_Pin,
 			BIN1_1_GPIO_Port, BIN1_1_Pin,
-			BIN2_1_GPIO_Port, BIN2_1_Pin, &adc_data.mag_base, INVERTED);
+			BIN2_1_GPIO_Port, BIN2_1_Pin, &adc_data.mag_base, NON_INVERTED);
 	motor_base.setSpeed(12);
 	motor_base.setStepBound(BASE_STEP_RANGE);
 
 	Stepper motor_led(STEPS, AIN1_2_GPIO_Port, AIN1_2_Pin,
 				AIN2_2_GPIO_Port, AIN2_2_Pin,
 				BIN1_2_GPIO_Port, BIN1_2_Pin,
-				BIN2_2_GPIO_Port, BIN2_2_Pin,  &adc_data.mag_led, NON_INVERTED);
+				BIN2_2_GPIO_Port, BIN2_2_Pin,  &adc_data.mag_led, INVERTED);
 	motor_led.setSpeed(16);
 	motor_led.setStepBound(LED_STEP_RANGE);
 
 	uint32_t counter = 0;
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*) &adc_data, 4);
 	HAL_Delay(100);
+
 	while (1)
 		  {
 			counter += 1;
@@ -71,7 +87,7 @@ int myMain(void){
 //				motor_base.step(-3078);
 //				motor_base.step(-3078);
 //			}
-//			startCal(0, 0.5, 0, 0.3, motor_base, motor_led);
+			startCal(0, 0.5, 0, 0.3, motor_base, motor_led);
 
 			while(1){};
 
@@ -110,6 +126,7 @@ int myMain(void){
 //			HAL_Delay(500);
 //			HAL_GPIO_WritePin(BLUE_LED_GPIO_Port, BLUE_LED_Pin, GPIO_PIN_SET);
 		  }
+#endif
 }
 
 //uint32_t test_cnt = 0;
@@ -222,3 +239,17 @@ void Config_HSE(void)
 
   return;
 }
+
+void initClk (void)
+{
+  RCC_OscInitTypeDef st_oscInit = {0};
+
+  /* Get mutex */
+  LL_HSEM_1StepLock(HSEM, 5);
+
+  st_oscInit.OscillatorType = RCC_OSCILLATORTYPE_HSI48;
+  st_oscInit.HSI48State     = RCC_HSI48_ON; /* Used by USB */
+  HAL_RCC_OscConfig(&st_oscInit);
+}
+
+

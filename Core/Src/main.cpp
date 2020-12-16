@@ -1,3 +1,4 @@
+
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
@@ -100,6 +101,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
   Init_Exti( );
+  initClk();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -128,7 +130,7 @@ int main(void)
   {
     /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+	  /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -208,6 +210,10 @@ void SystemClock_Config(void)
   }
   /* USER CODE BEGIN Smps */
 
+  //https://community.st.com/s/question/0D50X0000C0wdqe/stm32wb55-ble-hid?t=1591239574627
+  LL_HSEM_1StepLock(HSEM, 5 );
+  LL_RCC_HSI48_Enable();
+  while(!LL_RCC_HSI48_IsReady());
   /* USER CODE END Smps */
 }
 
