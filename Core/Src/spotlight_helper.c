@@ -60,51 +60,21 @@ void measMsgReceivedFromNode(struct MeasMsg* msg){
 	// send over UART if USB UART active
 #if USB_UART_ACTIVE
 	int8_t retry = 0;
-//	CDC_Transmit_FS(position, sizeof(position));
-//	taskENTER_CRITICAL();
+
 	memcpy((struct MeasMsg*) &serialMsg.measMsg, msg, sizeof(struct MeasMsg));
 
+	/* the "-2" in the size is a hack-ish way of removing the byte padding for the python
+	 	 data ingester doesn't screw up*/
 	while(CDC_Transmit_FS((uint8_t* ) &serialMsg, sizeof(serialMsg)-2) != USBD_OK){
 			if(retry == 5){
 				retry = -1;
 				break;
 			}
-	//		osDelay(1);
 			HAL_Delay(1);
 			retry+=1;
 
 		}
 
-
-
-//	while(CDC_Transmit_FS((uint8_t* ) msg, sizeof(struct MeasMsg)) != USBD_OK){
-//		if(retry == 5){
-//			retry = -1;
-//			break;
-//		}
-////		osDelay(1);
-//		HAL_Delay(1);
-//		retry+=1;
-//
-//	}
-//	if(retry != -1){
-//		while(CDC_Transmit_FS((uint8_t* ) endOfLine, sizeof(endOfLine)) != USBD_OK){
-//			if(retry == 5){
-//				retry = 0;
-//				break;
-//			}
-//			//		osDelay(1);
-//			HAL_Delay(1);
-//
-//			retry+=1;
-//		}
-//	}
-
-//	CDC_Transmit_FS((uint8_t* ) msg, sizeof(struct  MeasMsg));
-//	osDelay(1);
-//	CDC_Transmit_FS((uint8_t* ) endOfLine, sizeof(endOfLine));
-//	osDelay(1);
-//	taskEXIT_CRITICAL();
 #endif
 
 
