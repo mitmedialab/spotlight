@@ -41,15 +41,15 @@ struct CalMsg {
 	uint8_t UID;
 	uint8_t cal_code;
 	uint8_t cal_fcn;
-	int16_t angle_1;
-	int16_t angle_2;
+	int32_t angle_1;
+	int32_t angle_2;
 };
 
 struct MeasMsg{
 	uint8_t UID;
 	uint8_t command;
-	int16_t angle_1;
-	int16_t angle_2;
+	int32_t angle_1;
+	int32_t angle_2;
 	uint16_t power;
 	uint16_t current;
 	uint16_t shuntVoltage;
@@ -57,7 +57,7 @@ struct MeasMsg{
 };
 
 void measMsgReceivedFromNode(struct MeasMsg* msg);
-void sendPowerMeasurement(otIp6Address peerAddr, int8_t angle_1, int8_t angle_2);
+void sendPowerMeasurement(otIp6Address peerAddr, int32_t angle_1, int32_t angle_2);
 
 void powerMeasSetup(void);
 uint16_t getPower();

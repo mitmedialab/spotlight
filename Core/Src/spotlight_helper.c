@@ -82,7 +82,7 @@ void measMsgReceivedFromNode(struct MeasMsg* msg){
 }
 
 #ifdef SOLAR_SENSOR_NODE
-void sendPowerMeasurement(otIp6Address peerAddr, int8_t angle_1, int8_t angle_2){
+void sendPowerMeasurement(otIp6Address peerAddr, int32_t angle_1, int32_t angle_2){
 #ifndef SOLAR_SENSOR_NODE_I2C_DISABLE
 	measMsg.angle_1 = angle_1;
 	measMsg.angle_2 = angle_2;
