@@ -21,5 +21,8 @@ void Config_HSE(void);
 void initClk (void);
 
 extern osThreadId_t defaultTaskHandle;
+extern osThreadId_t msgTaskHandle;
+extern osMessageQueueId_t msgQueueHandle;
+
 
 #endif /* INC_MYMAIN_H_ */

@@ -60,6 +60,26 @@ const osThreadAttr_t defaultTask_attributes = {
     	.tz_module = 0,
     	.reserved = 0
       };
+
+#ifndef SOLAR_SENSOR_NODE
+osThreadId_t msgTaskHandle;
+const osThreadAttr_t msgTask_attributes = {
+    	.name = "msgTask",
+    	.attr_bits = osThreadDetached,
+    	.cb_mem = NULL,
+    	.cb_size = 0,
+    	.stack_mem = NULL,
+    	.stack_size = 256 * 4,
+    	.priority = (osPriority_t) osPriorityNormal,
+    	.tz_module = 0,
+    	.reserved = 0
+      };
+
+osMessageQueueId_t msgQueueHandle;
+const osMessageQueueAttr_t msgQueue_attributes = {
+  .name = "msgQueue"
+};
+#endif
 /* USER CODE END Variables */
 /* Definitions for defaultTask */
 //osThreadId_t defaultTaskHandle;
@@ -118,6 +138,12 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
+#ifndef SOLAR_SENSOR_NODE
+  msgTaskHandle = osThreadNew(MsgTask, NULL, &msgTask_attributes);
+
+  msgQueueHandle = osMessageQueueNew (10, sizeof(struct MeasMsg), &msgQueue_attributes);
+#endif
+
   APPE_Init();
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */

@@ -4,8 +4,8 @@ Stepper.cpp:178:1:Stepper::Stepper(int32_t, GPIO_TypeDef*, uint16_t, GPIO_TypeDe
 Stepper.cpp:223:6:void Stepper::setSpeed(long int)	16	static
 Stepper.cpp:233:6:void Stepper::setStepBound(int32_t)	16	static
 Stepper.cpp:237:10:uint32_t Stepper::step(int)	24	static
-Stepper.cpp:298:6:void Stepper::stepMotor(int)	16	static
-Stepper.cpp:499:6:void Stepper::honeAxis()	16	static
-Stepper.cpp:517:6:void Stepper::setAbsPos(int32_t)	16	static
-Stepper.cpp:522:10:uint32_t Stepper::getStepCount()	16	static
-Stepper.cpp:529:9:int32_t Stepper::version()	16	static
+Stepper.cpp:303:6:void Stepper::stepMotor(int)	16	static
+Stepper.cpp:504:6:void Stepper::honeAxis()	16	static
+Stepper.cpp:522:6:void Stepper::setAbsPos(int32_t)	16	static
+Stepper.cpp:527:10:uint32_t Stepper::getStepCount()	16	static
+Stepper.cpp:534:9:int32_t Stepper::version()	16	static

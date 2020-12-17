@@ -11,6 +11,7 @@ extern "C" {
 
 #include "FreeRTOS.h"
 #include "task.h"
+#include "led.h"
 
 #ifdef SOLAR_SENSOR_NODE
 #include "i2c.h"
@@ -34,36 +35,71 @@ struct SerialMsg{
 
 extern volatile struct MeasMsg measMsg;
 volatile struct SerialMsg serialMsg = {
-		.endOfLine="\n\r"
+		.endOfLine="\r\n"
 };
 
 char* endOfLine = "\n\r";
 
+#ifndef SOLAR_SENSOR_NODE
+void MsgTask(void *argument)
+{
+	struct MeasMsg msg;
+
+	while(1){
+		// grab message from queue
+		osMessageQueueGet (msgQueueHandle, &msg, NULL, osWaitForever);
+
+		// operate on said message
+		measMsgReceivedFromNode(&msg);
+	}
+}
+#endif
 
 void measMsgReceivedFromNode(struct MeasMsg* msg){
+
 	// send over UART if USB UART active
 #if USB_UART_ACTIVE
-	uint8_t retry = 0;
+	int8_t retry = 0;
 //	CDC_Transmit_FS(position, sizeof(position));
 //	taskENTER_CRITICAL();
 	memcpy((struct MeasMsg*) &serialMsg.measMsg, msg, sizeof(struct MeasMsg));
-	while(CDC_Transmit_FS((uint8_t* ) msg, sizeof(struct MeasMsg)) != USBD_OK){
-		if(retry == 5){
-			retry = 0;
-			break;
-		}
-		osDelay(1);
-		retry+=1;
 
-	}
-	while(CDC_Transmit_FS((uint8_t* ) endOfLine, sizeof(endOfLine)) != USBD_OK){
-		if(retry == 5){
-			retry = 0;
-			break;
+	while(CDC_Transmit_FS((uint8_t* ) &serialMsg, sizeof(serialMsg)-2) != USBD_OK){
+			if(retry == 5){
+				retry = -1;
+				break;
+			}
+	//		osDelay(1);
+			HAL_Delay(1);
+			retry+=1;
+
 		}
-		osDelay(1);
-		retry+=1;
-	}
+
+
+
+//	while(CDC_Transmit_FS((uint8_t* ) msg, sizeof(struct MeasMsg)) != USBD_OK){
+//		if(retry == 5){
+//			retry = -1;
+//			break;
+//		}
+////		osDelay(1);
+//		HAL_Delay(1);
+//		retry+=1;
+//
+//	}
+//	if(retry != -1){
+//		while(CDC_Transmit_FS((uint8_t* ) endOfLine, sizeof(endOfLine)) != USBD_OK){
+//			if(retry == 5){
+//				retry = 0;
+//				break;
+//			}
+//			//		osDelay(1);
+//			HAL_Delay(1);
+//
+//			retry+=1;
+//		}
+//	}
+
 //	CDC_Transmit_FS((uint8_t* ) msg, sizeof(struct  MeasMsg));
 //	osDelay(1);
 //	CDC_Transmit_FS((uint8_t* ) endOfLine, sizeof(endOfLine));

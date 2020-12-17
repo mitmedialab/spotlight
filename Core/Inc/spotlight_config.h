@@ -56,6 +56,7 @@ struct MeasMsg{
 	uint16_t busVoltage;
 };
 
+void MsgTask(void *argument);
 void measMsgReceivedFromNode(struct MeasMsg* msg);
 void sendPowerMeasurement(otIp6Address peerAddr, int32_t angle_1, int32_t angle_2);
 

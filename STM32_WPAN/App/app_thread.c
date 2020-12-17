@@ -41,7 +41,7 @@
 #include "led.h"
 #include "spotlight_config.h"
 //#include "calibration.h"
-
+#include "myMain.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -650,7 +650,9 @@ static void APP_THREAD_CoapNodeSpotRequestHandler(void                * pContext
 
 			if (otCoapHeaderGetCode(pHeader) == OT_COAP_CODE_PUT)
 			{
-				measMsgReceivedFromNode(&receivedMeasMsg);
+//				measMsgReceivedFromNode(&receivedMeasMsg);
+				toggleLed(1,1,1);
+				osMessageQueuePut (msgQueueHandle, &receivedMeasMsg, NULL, 0);
 				toggleLed(0,0,1);
 			}
 
