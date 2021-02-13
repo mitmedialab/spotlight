@@ -5,10 +5,15 @@ import sys
 import time
 
 COM_PORT = 'COM11'
-SAVE_DIRECTORY = 'C:/Users/patrick/Desktop/'
+SAVE_DIRECTORY = 'C:/Users/patri/Desktop/'
 
 STRUCT_DEF = 'BBiiHHHH'
 STRUCT_SIZE = struct.calcsize(STRUCT_DEF)
+
+CURRENT_RES = 0.12158 # uA/bit
+BUS_VOLT_RES = 1.25 # mV/bit
+SHUNT_VOLT_RES = 2.5 # uV/bit
+POWER_RES = CURRENT_RES*25 # uW/bit
 
 current_milli_time = lambda: int(round(time.time() * 1000))
 
@@ -39,7 +44,7 @@ def main():
     s = serial.Serial(COM_PORT)
 
     # OPEN LOG FILE
-    f = open(SAVE_DIRECTORY + 'spotlight.csv', 'w')
+    f = open(SAVE_DIRECTORY + 'spotlight.csv', 'w', newline='')
     writer = csv.writer(f)
 
     try:

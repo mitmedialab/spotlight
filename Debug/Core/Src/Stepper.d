@@ -58,7 +58,7 @@ Core/Src/Stepper.o: ../Core/Src/Stepper.cpp ../Core/Inc/Stepper.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_hsem.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_gpio.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_rtc.h ../Core/Inc/tim.h \
- C:/Users/patrick/STM32Cube/Repository/Packs/ARM/CMSIS/5.6.0/CMSIS/DSP/Include/arm_math.h \
+ C:/Users/patri/STM32Cube/Repository/Packs/ARM/CMSIS/5.6.0/CMSIS/DSP/include/arm_math.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h
 
 ../Core/Inc/Stepper.h:
@@ -189,6 +189,6 @@ Core/Src/Stepper.o: ../Core/Src/Stepper.cpp ../Core/Inc/Stepper.h \
 
 ../Core/Inc/tim.h:
 
-C:/Users/patrick/STM32Cube/Repository/Packs/ARM/CMSIS/5.6.0/CMSIS/DSP/Include/arm_math.h:
+C:/Users/patri/STM32Cube/Repository/Packs/ARM/CMSIS/5.6.0/CMSIS/DSP/include/arm_math.h:
 
 ../Drivers/CMSIS/Include/cmsis_compiler.h:

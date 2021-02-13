@@ -87,7 +87,7 @@ int myMain(void){
 //				motor_base.step(-3078);
 //				motor_base.step(-3078);
 //			}
-			startCal(0, 0.5, 0, 0.3, motor_base, motor_led);
+			startCal(0.0, 0.15, 0.05, 0.2, motor_base, motor_led);
 
 			while(1){};
 
