@@ -27,7 +27,7 @@ def unpack_spotlight_packet(msg, curr_time):
 
     try:
         unpacked_msg = struct.unpack(STRUCT_DEF,msg) + (curr_time,)
-        print(sys.getsizeof(msg))
+        # print(sys.getsizeof(msg))
     except Exception as e:
         print(e)
         print(msg)
@@ -44,7 +44,7 @@ def main():
     s = serial.Serial(COM_PORT)
 
     # OPEN LOG FILE
-    f = open(SAVE_DIRECTORY + 'spotlight.csv', 'w', newline='')
+    f = open(SAVE_DIRECTORY + 'spotlight_' + str(int(time.time())) + '.csv', 'w', newline='')
     writer = csv.writer(f)
 
     try:
@@ -63,7 +63,7 @@ def main():
             received_msg = received_msg.replace(b'\r\n', b'')
 
             # UNPACK (remove \r\n with -2)
-            print(sys.getsizeof(received_msg))
+            # print(sys.getsizeof(received_msg))
             # print(received_msg)
             unpacked_msg = unpack_spotlight_packet(received_msg, curr_time)
 

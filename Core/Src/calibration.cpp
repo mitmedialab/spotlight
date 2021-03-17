@@ -16,8 +16,9 @@
 #define CAL_INIT_CAL_TIMEOUT	2000
 #define CAL_POS_TIMEOUT  		2000 // 1 second
 
-
-
+//#define SPOTLIGHT_INTERVAL_DELAY	200
+//#define SPOTLIGHT_INTERVAL_DELAY	500
+#define SPOTLIGHT_INTERVAL_DELAY	1000
 
 
 uint32_t calibration_table[20] = {0};
@@ -44,6 +45,7 @@ int32_t base_step;
  */
 #ifndef SOLAR_SENSOR_NODE
 
+uint8_t perpetual_record = 0;
 void startCal(float angle_base_min, float angle_base_max,
 		float angle_led_min, float angle_led_max,
 				Stepper& motor_base, Stepper& motor_led){
@@ -78,44 +80,58 @@ void startCal(float angle_base_min, float angle_base_max,
 		// calculate step bounds for each axis
 		int32_t min_led_axis_step = (((angle_led_min) * LED_STEP_RANGE));
 		int32_t max_led_axis_step = (((angle_led_max) * LED_STEP_RANGE));
-		int32_t min_base_axis_step = (((angle_led_min) * BASE_STEP_RANGE));
-		int32_t max_base_axis_step = (((angle_led_max) * BASE_STEP_RANGE));
+		int32_t min_base_axis_step = (((angle_base_min) * BASE_STEP_RANGE));
+		int32_t max_base_axis_step = (((angle_base_max) * BASE_STEP_RANGE));
 
-		// move to desired angle
-		uint8_t flip_dir = 0;
-		for(base_step = min_base_axis_step; base_step <= max_base_axis_step; base_step += (BASE_CAL_STEP_MULTI * BASE_MIN_ANGLE_STEP)){
-			motor_base.setAbsPos(base_step);
-
-			if(flip_dir == 0){
-				for(led_step = min_led_axis_step; led_step <= max_led_axis_step; led_step += (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
-					motor_led.setAbsPos(led_step);
-					getMeasurementsFromNodes(&calMsg, base_step, led_step);
-
-					// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
-#ifndef DEBUG_SERIAL
-					osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
-#else
-					osDelay(100);
-#endif
-				}
-				flip_dir = 1;
-			}
-			else{
-				for(led_step = max_led_axis_step; led_step >= min_led_axis_step; led_step -= (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
-					motor_led.setAbsPos(led_step);
-					getMeasurementsFromNodes(&calMsg, base_step, led_step);
-
-					// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
-#ifndef DEBUG_SERIAL
-					osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
-#else
-					osDelay(100);
-#endif
-				}
-				flip_dir = 0;
-			}
+		if( (max_base_axis_step == 0) && (min_base_axis_step == 0)){
+			perpetual_record = 1;
 		}
 
+		if(perpetual_record == 1){
+			while(true){
+				getMeasurementsFromNodes(&calMsg, base_step, led_step);
+				osDelay(SPOTLIGHT_INTERVAL_DELAY);
+			}
+		}
+		else{
+			// move to desired angle
+			uint8_t flip_dir = 0;
+			for(base_step = min_base_axis_step; base_step <= max_base_axis_step; base_step += (BASE_CAL_STEP_MULTI * BASE_MIN_ANGLE_STEP)){
+				motor_base.setAbsPos(base_step);
+
+				if(flip_dir == 0){
+					for(led_step = min_led_axis_step; led_step <= max_led_axis_step; led_step += (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
+						motor_led.setAbsPos(led_step);
+						getMeasurementsFromNodes(&calMsg, base_step, led_step);
+
+						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
+	#ifndef DEBUG_SERIAL
+						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
+	#else
+						osDelay(100);
+	#endif
+						osDelay(SPOTLIGHT_INTERVAL_DELAY);
+					}
+					flip_dir = 1;
+				}
+				else{
+					for(led_step = max_led_axis_step; led_step >= min_led_axis_step; led_step -= (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
+						motor_led.setAbsPos(led_step);
+						getMeasurementsFromNodes(&calMsg, base_step, led_step);
+
+						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
+	#ifndef DEBUG_SERIAL
+						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
+	#else
+						osDelay(100);
+	#endif
+						osDelay(SPOTLIGHT_INTERVAL_DELAY);
+					}
+					flip_dir = 0;
+				}
+			}
+
+		}
 
 //	/* (5) send calibration complete message to all nodes */
 		broadcastCalComplete(&calMsg);

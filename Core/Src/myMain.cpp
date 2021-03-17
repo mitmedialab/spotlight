@@ -87,7 +87,38 @@ int myMain(void){
 //				motor_base.step(-3078);
 //				motor_base.step(-3078);
 //			}
-			startCal(0.0, 0.15, 0.05, 0.2, motor_base, motor_led);
+
+			// turn off light, record perpetually
+//			HAL_GPIO_WritePin(LED_EN_GPIO_Port, LED_EN_Pin, GPIO_PIN_RESET);
+//			HAL_TIM_PWM_Stop(&htim17, TIM_CHANNEL_1);
+//			HAL_TIM_Base_Stop(&htim17);
+//
+//			startCal(0, 0, 0, 0, motor_base, motor_led);
+
+
+			// apartment
+			startCal(0.2, 0.98, 0.1, 0.3, motor_base, motor_led);
+//			startCal(.98, 1.0, 0.1, 0.3, motor_base, motor_led);
+
+
+			// 12 ft @ 59" high
+//			startCal(0.35, 0.65, 0.1, 0.3, motor_base, motor_led);
+
+//			// 6 ft @ 59" high
+//			startCal(0.3, 0.7, 0.1, 0.5, motor_base, motor_led);
+
+			// 10 ft with table, more off axis
+//			startCal(0.2, 0.4, 0.1, 0.5, motor_base, motor_led);
+
+
+//			startCal(0.0, 0.15, 0.05, 0.2, motor_base, motor_led);
+
+			// turn off spotlight
+			HAL_GPIO_WritePin(LED_EN_GPIO_Port, LED_EN_Pin, GPIO_PIN_RESET);
+			HAL_TIM_PWM_Stop(&htim17, TIM_CHANNEL_1);
+			HAL_TIM_Base_Stop(&htim17);
+
+
 
 			while(1){};
 
