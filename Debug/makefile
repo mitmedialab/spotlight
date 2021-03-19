@@ -85,7 +85,7 @@ main-build: Spotlight_v1.1.elf secondary-outputs
 
 # Tool invocations
 Spotlight_v1.1.elf: $(OBJS) $(USER_OBJS) C:\dev\Spotlight_v1.1\STM32WB55RGVX_FLASH.ld
-	arm-none-eabi-g++ -o "Spotlight_v1.1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\dev\Spotlight_v1.1\STM32WB55RGVX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Spotlight_v1.1.map" -Wl,--gc-sections -static -L"C:\Users\patri\STM32Cube\Repository\Packs\ARM\CMSIS\5.6.0\CMSIS\DSP\Lib\GCC" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+	arm-none-eabi-g++ -o "Spotlight_v1.1.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\dev\Spotlight_v1.1\STM32WB55RGVX_FLASH.ld" -Wl,-Map="Spotlight_v1.1.map" -Wl,--gc-sections -static -L"C:\dev\Spotlight_v1.1\Drivers\CMSIS\DSP\Lib\GCC" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
