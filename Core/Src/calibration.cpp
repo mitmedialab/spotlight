@@ -10,6 +10,8 @@
 #include "usbd_cdc_if.h"
 #include "myMain.h"
 #include "spotlight_config.h"
+#include "CaliPile.h"
+#include "light_sensor.h"
 
 #define SPOTLIGHT_UID			0x18
 
@@ -45,7 +47,25 @@ int32_t base_step;
  */
 #ifndef SOLAR_SENSOR_NODE
 
+
+
 uint8_t perpetual_record = 0;
+
+uint32_t temp, temp_amb;
+char result[150];
+int string_len;
+
+uint8_t rawData[10];
+uint16_t _PTAT25;
+
+float conv_temp, conv_temp_amb;
+uint8_t tp_presence, tp_motion;
+
+uint16_t r, g, b, c, colorTemp, lux;
+uint16_t m_env;
+
+sensorSample sensorPacket;
+
 void startCal(float angle_base_min, float angle_base_max,
 		float angle_led_min, float angle_led_max,
 				Stepper& motor_base, Stepper& motor_led){
@@ -103,6 +123,7 @@ void startCal(float angle_base_min, float angle_base_max,
 					for(led_step = min_led_axis_step; led_step <= max_led_axis_step; led_step += (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
 						motor_led.setAbsPos(led_step);
 						getMeasurementsFromNodes(&calMsg, base_step, led_step);
+						sampleSensors(&sensorPacket);
 
 						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
 	#ifndef DEBUG_SERIAL
@@ -118,7 +139,7 @@ void startCal(float angle_base_min, float angle_base_max,
 					for(led_step = max_led_axis_step; led_step >= min_led_axis_step; led_step -= (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
 						motor_led.setAbsPos(led_step);
 						getMeasurementsFromNodes(&calMsg, base_step, led_step);
-
+						sampleSensors(&sensorPacket);
 						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
 	#ifndef DEBUG_SERIAL
 						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
@@ -139,6 +160,21 @@ void startCal(float angle_base_min, float angle_base_max,
 }
 #endif
 
+
+void sampleSensors(sensorSample* packet){
+	packet->temp = calipile_getTPOBJ();
+	packet->temp_amb = calipile_getTPAMB();
+
+	packet->conv_temp_amb = calipile_getTamb(temp_amb);
+	packet->conv_temp = calipile_getTobj(temp, conv_temp_amb);
+	packet->tp_presence = calipile_getTPPRESENCE();
+	packet->tp_motion = calipile_getTPMOTION();
+
+	packet->light_getRawData(&r, &g, &b, &c);
+	// colorTemp = tcs.calculateColorTemperature(r, g, b);
+	packet->colorTemp = light_calculateColorTemperature_dn40(r, g, b, c);
+	packet->lux = light_calculateLux(r, g, b);
+}
 
 void broadcastCalStart(CalMsg* msg){
 

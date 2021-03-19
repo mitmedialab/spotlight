@@ -114,8 +114,18 @@ int main(void)
   MX_RF_Init();
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
+  calipile_setup(CALIPILE_ADDRESS, TP_INT_Pin, TP_INT_GPIO_Port, &hi2c1);
+	calipile_wake();
+	calipile_readEEPROM();
 
-  /* USER CODE END 2 */
+	calipile_initMotion(tcLP1, tcLP2, LPsource, cycTime); // configure presence and motion interrupts
+
+	calipile_initTempThr(Tcounts);  // choose something ~5% above TPAMB
+
+
+	light_begin(TCS34725_ADDRESS, NULL, NULL, &hi2c1, TCS34725_INTEGRATIONTIME_700MS, TCS34725_GAIN_1X);
+
+	/* USER CODE END 2 */
 
   /* Init scheduler */
   osKernelInitialize();  /* Call init function for freertos objects (in freertos.c) */
