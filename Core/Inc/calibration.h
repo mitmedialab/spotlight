@@ -38,14 +38,14 @@ struct SensorSamples{
 	uint8_t tp_motion;
 
 	uint16_t r, g, b, c, colorTemp, lux;
-} sensorSample;
+};
 
 void addNodeID(uint32_t UID, uint32_t *arr);
 int valueinarray(float val, float arr[]);
 void broadcastCalStart(struct CalMsg* msg);
 void getMeasurementsFromNodes(struct CalMsg* msg, int32_t angle_1, int32_t angle_2);
 void broadcastCalComplete(struct CalMsg* msg);
-void sampleSensors(sensorSample* packet)
+void sampleSensors(struct SensorSamples* packet);
 
 #ifdef __cplusplus
 }

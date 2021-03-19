@@ -39,6 +39,8 @@
 #include "dbg_trace.h"
 #include "hw_conf.h"
 #include "myMain.h"
+#include "CaliPile.h"
+#include "light_sensor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

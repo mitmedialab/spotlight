@@ -64,7 +64,7 @@ uint8_t tp_presence, tp_motion;
 uint16_t r, g, b, c, colorTemp, lux;
 uint16_t m_env;
 
-sensorSample sensorPacket;
+struct SensorSamples sensorPacket;
 
 void startCal(float angle_base_min, float angle_base_max,
 		float angle_led_min, float angle_led_max,
@@ -161,7 +161,7 @@ void startCal(float angle_base_min, float angle_base_max,
 #endif
 
 
-void sampleSensors(sensorSample* packet){
+void sampleSensors(struct SensorSamples* packet){
 	packet->temp = calipile_getTPOBJ();
 	packet->temp_amb = calipile_getTPAMB();
 
