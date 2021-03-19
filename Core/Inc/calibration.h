@@ -29,16 +29,7 @@ void startCal(float angle_base_min, float angle_base_max,
 				Stepper& motor_base, Stepper& motor_led);
 #endif
 
-struct SensorSamples{
-	uint32_t temp;
-	uint32_t temp_amb;
-	float conv_temp;
-	float conv_temp_amb;
-	uint8_t tp_presence;
-	uint8_t tp_motion;
 
-	uint16_t r, g, b, c, colorTemp, lux;
-};
 
 void addNodeID(uint32_t UID, uint32_t *arr);
 int valueinarray(float val, float arr[]);

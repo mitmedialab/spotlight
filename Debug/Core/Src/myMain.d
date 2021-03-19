@@ -25,6 +25,8 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_hsem.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usb.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd_ex.h \
@@ -71,8 +73,9 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
  ../Middlewares/ST/STM32_WPAN/thread/openthread/stack/include/openthread/platform/radio.h \
  ../Core/Inc/spotlight_config.h ../Core/Inc/stepper.h \
  ../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h \
- ../Core/Inc/spotlight_config.h ../Core/Inc/tim.h ../Core/Inc/stepper.h \
- ../Core/Inc/adc.h
+ ../Core/Inc/spotlight_config.h ../Core/Inc/i2c.h ../Core/Inc/CaliPile.h \
+ ../Core/Inc/i2c.h ../Core/Inc/light_sensor.h ../Core/Inc/tim.h \
+ ../Core/Inc/stepper.h ../Core/Inc/adc.h
 
 ../Core/Inc/myMain.h:
 
@@ -129,6 +132,10 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio_ex.h:
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_hsem.h:
+
+../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c.h:
+
+../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c_ex.h:
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd.h:
 
@@ -235,6 +242,14 @@ Core/Src/myMain.o: ../Core/Src/myMain.cpp ../Core/Inc/myMain.h \
 ../Drivers/CMSIS/Device/ST/STM32WBxx/Include/stm32wb55xx.h:
 
 ../Core/Inc/spotlight_config.h:
+
+../Core/Inc/i2c.h:
+
+../Core/Inc/CaliPile.h:
+
+../Core/Inc/i2c.h:
+
+../Core/Inc/light_sensor.h:
 
 ../Core/Inc/tim.h:
 

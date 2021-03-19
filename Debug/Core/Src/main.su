@@ -1,0 +1,8 @@
+stm32wbxx_ll_rcc.h:1560:22:void LL_RCC_HSI48_Enable()	4	static
+stm32wbxx_ll_rcc.h:1580:26:uint32_t LL_RCC_HSI48_IsReady()	4	static
+stm32wbxx_ll_rcc.h:1665:22:void LL_RCC_LSE_SetDriveCapability(uint32_t)	16	static
+stm32wbxx_ll_hsem.h:233:26:uint32_t LL_HSEM_1StepLock(HSEM_TypeDef*, uint32_t)	16	static
+main.cpp:82:5:int main()	8	static
+main.cpp:146:6:void SystemClock_Config()	192	static
+main.cpp:236:6:void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef*)	16	static
+main.cpp:253:6:void Error_Handler()	4	static,ignoring_inline_asm

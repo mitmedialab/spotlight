@@ -176,14 +176,14 @@ uint8_t calipile_getTPPRESENCE(){
 
   void calipile_readEEPROM()
   {
- 
+
   uint8_t rawData[2] = {0, 0};
   uint8_t packet;
   /* Start of EEPROM operations, just have to do once *************************************************** */
- // Check EEPROM protocol number as a test of I2C communication 
+ // Check EEPROM protocol number as a test of I2C communication
   packet = 0x80;
   calipile_writeByte(CALIPILE_EEPROM_CONTROL, &packet); // enable EEPROM read
-   
+
   uint8_t c;
   calipile_readByte(CALIPILE_EEPROM_PROTOCOL, &c);
 //  Serial.print("CaliPile EEPROM protocol number is "); Serial.println(c);

@@ -56,9 +56,20 @@ struct MeasMsg{
 	uint16_t busVoltage;
 };
 
+struct SensorSamples{
+	uint32_t temp;
+	uint32_t temp_amb;
+	float conv_temp;
+	float conv_temp_amb;
+	uint16_t tp_presence, tp_motion;
+
+	uint16_t r, g, b, c, colorTemp, lux;
+};
+
 void MsgTask(void *argument);
 void measMsgReceivedFromNode(struct MeasMsg* msg);
 void sendPowerMeasurement(otIp6Address peerAddr, int32_t angle_1, int32_t angle_2);
+void sendSensorMeas_USB(struct SensorSamples* msg);
 
 void powerMeasSetup(void);
 uint16_t getPower();

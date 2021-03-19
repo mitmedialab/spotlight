@@ -13,6 +13,10 @@
 #ifndef CALIPILE_h
 #define CALIPILE_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "stdint.h"
 #include "stm32wbxx_hal.h"
 #include "i2c.h"
@@ -114,5 +118,8 @@ void calipile_writeByte(uint8_t reg, uint8_t* packet);
 void calipile_readByte(uint8_t reg, uint8_t* packet);
 void calipile_readBytes(uint8_t reg, uint8_t* packet, uint8_t len);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif

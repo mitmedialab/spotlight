@@ -30,6 +30,8 @@ Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o: \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_hsem.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usb.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd_ex.h \
@@ -111,6 +113,10 @@ Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.o: \
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio_ex.h:
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_hsem.h:
+
+../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c.h:
+
+../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c_ex.h:
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd.h:
 

@@ -34,6 +34,11 @@ uint8_t _int;
 GPIO_TypeDef* _intPort;
 I2C_HandleTypeDef* i2c_periph;
 
+bool _tcs34725Initialised;
+tcs34725Gain_t _tcs34725Gain;
+tcs34725IntegrationTime_t _tcs34725IntegrationTime;
+
+
 /* Functions Definition ------------------------------------------------------*/
 
 

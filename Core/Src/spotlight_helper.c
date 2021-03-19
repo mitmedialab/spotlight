@@ -33,8 +33,17 @@ struct SerialMsg{
 	char endOfLine[4];
 };
 
+struct SerialSensorMsg{
+	struct SensorSamples sensorMeasMsg;
+	char endOfLine[4];
+};
+
 extern volatile struct MeasMsg measMsg;
 volatile struct SerialMsg serialMsg = {
+		.endOfLine="\r\n"
+};
+
+volatile struct SerialSensorMsg serialSensorMsg = {
 		.endOfLine="\r\n"
 };
 
@@ -85,6 +94,29 @@ void measMsgReceivedFromNode(struct MeasMsg* msg){
 
 	// TODO if all expected nodes have replied, move to next Spotlight position
 	osThreadFlagsSet (defaultTaskHandle, CAL_THREAD_FLAG);
+}
+
+void sendSensorMeas_USB(struct SensorSamples* msg){
+
+	// send over UART if USB UART active
+#if USB_UART_ACTIVE
+	int8_t retry = 0;
+
+	memcpy((struct SensorSamples*) &serialSensorMsg.sensorMeasMsg, msg, sizeof(struct SensorSamples));
+
+	/* the "-2" in the size is a hack-ish way of removing the byte padding for the python
+	 	 data ingester doesn't screw up*/
+	while(CDC_Transmit_FS((uint8_t* ) &serialSensorMsg, sizeof(serialSensorMsg)-2) != USBD_OK){
+			if(retry == 5){
+				retry = -1;
+				break;
+			}
+			HAL_Delay(1);
+			retry+=1;
+
+		}
+
+#endif
 }
 
 #ifdef SOLAR_SENSOR_NODE

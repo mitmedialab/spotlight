@@ -10,6 +10,9 @@
 #ifndef LIGHT_SENSOR_H
 #define LIGHT_SENSOR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "stdint.h"
 #include "i2c.h"
@@ -172,9 +175,6 @@ void light_begin(uint8_t deviceAddress, uint8_t intPin, GPIO_TypeDef* intPort, I
 void light_setWait(uint8_t value);
 /* variables -----------------------------------------------*/
 
-  bool _tcs34725Initialised;
-  tcs34725Gain_t _tcs34725Gain;
-  tcs34725IntegrationTime_t _tcs34725IntegrationTime;
 
 /* Functions Definition ------------------------------------------------------*/
 
@@ -198,6 +198,8 @@ void light_setWait(uint8_t value);
  * FREERTOS WRAPPER FUNCTIONS
  *
 *************************************************************/
-
+#ifdef __cplusplus
+}
+#endif
 
 #endif

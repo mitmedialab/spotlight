@@ -17,6 +17,10 @@
 #include "calibration.h"
 #include "spotlight_config.h"
 
+#include "i2c.h"
+#include "CaliPile.h"
+#include "light_sensor.h"
+
 #ifndef SOLAR_SENSOR_NODE
 #include "tim.h"
 #include "stepper.h"
@@ -36,9 +40,24 @@ struct ADC_DATA{
 
 struct ADC_DATA adc_data;
 
+uint8_t tcLP1 = TC_1s;
+uint8_t tcLP2 = TC_2s;
+uint8_t LPsource = src_TPOBJ_TPOBJLP2;
+uint8_t cycTime = cycTime_30ms;
+
+uint16_t Tcounts = 0x83;  // set threshold for over temperature interrupt, 0x83 == 67072 counts
+
 //uint16_t adc_data[4];
 
 int myMain(void){
+
+	calipile_setup(CALIPILE_ADDRESS, NULL, NULL, &hi2c1);
+	calipile_wake();
+	calipile_readEEPROM();
+	calipile_initMotion(tcLP1, tcLP2, LPsource, cycTime); // configure presence and motion interrupts
+	calipile_initTempThr(Tcounts);  // choose something ~5% above TPAMB
+
+	light_begin(TCS34725_ADDRESS, NULL, NULL, &hi2c1, TCS34725_INTEGRATIONTIME_700MS, TCS34725_GAIN_1X);
 
 #ifdef SOLAR_SENSOR_NODE
 	#ifndef SOLAR_SENSOR_NODE_I2C_DISABLE

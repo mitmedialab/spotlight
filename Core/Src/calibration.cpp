@@ -55,7 +55,7 @@ uint32_t temp, temp_amb;
 char result[150];
 int string_len;
 
-uint8_t rawData[10];
+//uint8_t rawData[10];
 uint16_t _PTAT25;
 
 float conv_temp, conv_temp_amb;
@@ -124,7 +124,7 @@ void startCal(float angle_base_min, float angle_base_max,
 						motor_led.setAbsPos(led_step);
 						getMeasurementsFromNodes(&calMsg, base_step, led_step);
 						sampleSensors(&sensorPacket);
-
+						sendSensorMeas_USB(&sensorPacket);
 						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
 	#ifndef DEBUG_SERIAL
 						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
@@ -140,6 +140,7 @@ void startCal(float angle_base_min, float angle_base_max,
 						motor_led.setAbsPos(led_step);
 						getMeasurementsFromNodes(&calMsg, base_step, led_step);
 						sampleSensors(&sensorPacket);
+						sendSensorMeas_USB(&sensorPacket);
 						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
 	#ifndef DEBUG_SERIAL
 						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
@@ -165,15 +166,15 @@ void sampleSensors(struct SensorSamples* packet){
 	packet->temp = calipile_getTPOBJ();
 	packet->temp_amb = calipile_getTPAMB();
 
-	packet->conv_temp_amb = calipile_getTamb(temp_amb);
-	packet->conv_temp = calipile_getTobj(temp, conv_temp_amb);
+	packet->conv_temp_amb = calipile_getTamb(packet->temp_amb);
+	packet->conv_temp = calipile_getTobj(packet->temp, packet->conv_temp_amb );
 	packet->tp_presence = calipile_getTPPRESENCE();
 	packet->tp_motion = calipile_getTPMOTION();
 
-	packet->light_getRawData(&r, &g, &b, &c);
+	light_getRawData(&packet->r, &packet->g, &packet->b, &packet->c);
 	// colorTemp = tcs.calculateColorTemperature(r, g, b);
-	packet->colorTemp = light_calculateColorTemperature_dn40(r, g, b, c);
-	packet->lux = light_calculateLux(r, g, b);
+	packet->colorTemp = light_calculateColorTemperature_dn40(packet->r, packet->g, packet->b, packet->c);
+	packet->lux = light_calculateLux(packet->r, packet->g, packet->b);
 }
 
 void broadcastCalStart(CalMsg* msg){

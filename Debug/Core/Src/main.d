@@ -25,6 +25,8 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_hsem.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c.h \
+ ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c_ex.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_ll_usb.h \
  ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd_ex.h \
@@ -71,7 +73,7 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
  ../Core/Inc/rtc.h ../Core/Inc/app_entry.h ../Core/Inc/app_common.h \
  ../Core/Inc/tim.h ../USB_Device/App/usb_device.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
- ../USB_Device/Target/usbd_conf.h ../Core/Inc/gpio.h \
+ ../USB_Device/Target/usbd_conf.h ../Core/Inc/gpio.h ../Core/Inc/i2c.h \
  ../Middlewares/ST/STM32_WPAN/utilities/otp.h \
  ../Middlewares/ST/STM32_WPAN/utilities/utilities_common.h \
  ../Core/Inc/app_conf.h ../Utilities/lpm/tiny_lpm/stm32_lpm.h \
@@ -132,6 +134,10 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_gpio_ex.h:
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_hsem.h:
+
+../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c.h:
+
+../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_i2c_ex.h:
 
 ../Drivers/STM32WBxx_HAL_Driver/Inc/stm32wbxx_hal_pcd.h:
 
@@ -244,6 +250,8 @@ Core/Src/main.o: ../Core/Src/main.cpp ../Core/Inc/main.h \
 ../USB_Device/Target/usbd_conf.h:
 
 ../Core/Inc/gpio.h:
+
+../Core/Inc/i2c.h:
 
 ../Middlewares/ST/STM32_WPAN/utilities/otp.h:
 
