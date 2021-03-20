@@ -69,7 +69,7 @@ int myMain(void){
 #else
 	HAL_TIM_Base_Start_IT(&htim2);
 
-//	HAL_GPIO_WritePin(LED_EN_GPIO_Port, LED_EN_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LED_EN_GPIO_Port, LED_EN_Pin, GPIO_PIN_SET);
 	HAL_TIM_Base_Start(&htim17);
 	HAL_TIM_PWM_Start(&htim17, TIM_CHANNEL_1);
 
@@ -115,8 +115,13 @@ int myMain(void){
 //			startCal(0, 0, 0, 0, motor_base, motor_led);
 
 
+			// ceiling above desk
+			startCal(0, 1.0, 0.6, 0.9, motor_base, motor_led);
+
+//			startCal(0, 1.0, 0.1, 0.9, motor_base, motor_led);
+
 			// apartment
-			startCal(0.2, 0.98, 0.1, 0.3, motor_base, motor_led);
+//			startCal(0.2, 0.98, 0.1, 0.3, motor_base, motor_led);
 //			startCal(.98, 1.0, 0.1, 0.3, motor_base, motor_led);
 
 

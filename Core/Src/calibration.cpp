@@ -18,9 +18,9 @@
 #define CAL_INIT_CAL_TIMEOUT	2000
 #define CAL_POS_TIMEOUT  		2000 // 1 second
 
-//#define SPOTLIGHT_INTERVAL_DELAY	200
+#define SPOTLIGHT_INTERVAL_DELAY	100
 //#define SPOTLIGHT_INTERVAL_DELAY	500
-#define SPOTLIGHT_INTERVAL_DELAY	1000
+//#define SPOTLIGHT_INTERVAL_DELAY	1000
 
 
 uint32_t calibration_table[20] = {0};
@@ -122,32 +122,43 @@ void startCal(float angle_base_min, float angle_base_max,
 				if(flip_dir == 0){
 					for(led_step = min_led_axis_step; led_step <= max_led_axis_step; led_step += (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
 						motor_led.setAbsPos(led_step);
+						osDelay(SPOTLIGHT_INTERVAL_DELAY);
+
+#ifdef SOLAR_MEAS_EN
 						getMeasurementsFromNodes(&calMsg, base_step, led_step);
+#endif
 						sampleSensors(&sensorPacket);
 						sendSensorMeas_USB(&sensorPacket);
 						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
 	#ifndef DEBUG_SERIAL
+#ifdef SOLAR_MEAS_EN
+
 						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
+#endif
+
 	#else
 						osDelay(100);
 	#endif
-						osDelay(SPOTLIGHT_INTERVAL_DELAY);
 					}
 					flip_dir = 1;
 				}
 				else{
 					for(led_step = max_led_axis_step; led_step >= min_led_axis_step; led_step -= (LED_CAL_STEP_MULTI * LED_MIN_ANGLE_STEP)){
 						motor_led.setAbsPos(led_step);
+						osDelay(SPOTLIGHT_INTERVAL_DELAY);
+#ifdef SOLAR_MEAS_EN
 						getMeasurementsFromNodes(&calMsg, base_step, led_step);
+#endif
 						sampleSensors(&sensorPacket);
 						sendSensorMeas_USB(&sensorPacket);
 						// wait CAL_POS_TIMEOUT milliseconds for nodes to reply with power values
 	#ifndef DEBUG_SERIAL
+#ifdef SOLAR_MEAS_EN
 						osThreadFlagsWait (CAL_THREAD_FLAG, osFlagsWaitAny, CAL_POS_TIMEOUT);
+#endif
 	#else
 						osDelay(100);
 	#endif
-						osDelay(SPOTLIGHT_INTERVAL_DELAY);
 					}
 					flip_dir = 0;
 				}

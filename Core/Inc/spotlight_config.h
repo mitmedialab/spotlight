@@ -19,6 +19,9 @@ extern "C" {
 //#define SOLAR_SENSOR_NODE_I2C_DISABLE	1
 //#define DEBUG_SERIAL				1
 
+// enable reading values from PV-equipped node
+//#define SOLAR_MEAS_EN			1
+
 #define CALIBRATION_CODE
 #define CALIBRATION_START_COMMAND	0x01
 #define CALIBRATION_GET_MEAS	0x02

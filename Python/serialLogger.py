@@ -4,8 +4,8 @@ import csv
 import sys
 import time
 
-COM_PORT = 'COM6'
-SAVE_DIRECTORY = 'C:/Users/patri/Desktop/'
+COM_PORT = 'COM9'
+SAVE_DIRECTORY = 'C:\dev\Spotlight_v1.1\Python\data'
 
 STRUCT_DEF = 'BBiiHHHH'
 STRUCT_SIZE = struct.calcsize(STRUCT_DEF)
@@ -50,7 +50,7 @@ def unpack_spotlight_packet(msg, curr_time):
         print(unpacked_msg)
         return [2, unpacked_msg]
     else:
-        return 0
+        return [0, 0]
 
 def main():
 
@@ -88,19 +88,29 @@ def main():
             # SAVE TO CSV
             if type == 1:
                 writer.writerow(unpacked_msg)
-            if type == 2:
+            elif type == 2:
                 writer_sense.writerow(unpacked_msg)
 
             # EVERY FEW SECONDS, SAVE CSV
 
-    except:
-            print("GRACEFUL EXIT")
+    except KeyboardInterrupt:
+        print("GRACEFUL EXIT")
 
-            # EXIT GRACEFULLY IF FORCED
+        # EXIT GRACEFULLY IF FORCED
 
-            # SAVE FILE
-            f.close()
-            f_sense.close()
+        # SAVE FILE
+        f.close()
+        f_sense.close()
+
+    except Exception as e:
+        print(e)
+        print("GRACEFUL EXIT")
+
+        # EXIT GRACEFULLY IF FORCED
+
+        # SAVE FILE
+        f.close()
+        f_sense.close()
 
 if __name__ == "__main__":
     main()
